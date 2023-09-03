@@ -15,6 +15,12 @@ class TaskScheduler:
             3: "Ready",
             4: "Running",
         }
+        self.lastRunResultMsg = {
+            "2": "(0x2)",
+            "0": "The operation completed successfully (0x0)",
+            "1": "(0x1)",
+            "267011": "The task has not yet run. (0x41303)",
+        }
         self.jobs = []
         self.grid = ui.aggrid(
             {
@@ -31,9 +37,18 @@ class TaskScheduler:
             }
         ).classes("h-screen")
 
-    # def connect(self):
+    def clearTable(self):
+        print("clearTable")
+        # self.grid.clear()
+        self.jobs = []
+        self.grid.options["rowData"] = []
+        self.grid.update()
+
+    def getLastRunMsg(self, msg: str) -> str:
+        return self.lastRunResultMsg[msg] if msg in self.lastRunResultMsg else msg
 
     def fetchAllJobs(self) -> None:
+        self.clearTable()
         self.folders = [self.scheduler.GetFolder("\\")]
         while self.folders:
             folder = self.folders.pop(0)
@@ -45,16 +60,16 @@ class TaskScheduler:
                         "path": task.Path,
                         "name": task.Name,
                         "state": self.TASK_STATE[task.State],
-                        "lastRun": task.LastRunTime,
-                        "nextRun": task.NextRunTime,
-                        "lastResult": task.LastTaskResult,
+                        "lastRun": str(task.LastRunTime),
+                        "nextRun": str(task.NextRunTime),
+                        "lastResult": self.getLastRunMsg(str(task.LastTaskResult)),
                     }
                 )
+        self.grid.options["rowData"] = self.jobs
         self.grid.update()
 
     def fetchAllJobsExcludeFolder(self, folderName: str) -> None:
-        # self.jobs = []
-        # self.grid.clear()
+        self.clearTable()
         self.folders = [self.scheduler.GetFolder("\\")]
         while self.folders:
             folder = self.folders.pop(0)
@@ -72,21 +87,17 @@ class TaskScheduler:
                             "lastResult": str(task.LastTaskResult),
                         }
                     )
-        # print("grid update", self.jobs)
+        self.grid.options["rowData"] = self.jobs
         self.grid.update()
-        # self.grid.clear()
-        # self.grid.clear()
-
-    def clearTable(self):
-        # self.grid.options["rowData"][0]
-        print(self.grid.options["rowData"])
-        # self.grid.options['rowData'].remove
-        # self.grid.call_api_method("setRowData", [None])
 
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.label("Hello NiceGUI!")
-    ui.button("Update", on_click=lambda: app.fetchAllJobsExcludeFolder("Microsoft"))
-    ui.button("Clear Table", on_click=lambda: app.clearTable)
+    ui.button(
+        # "Fetch Job List", on_click=lambda: app.fetchAllJobsExcludeFolder("Microsoft")
+        "Fetch Job List",
+        on_click=lambda: app.fetchAllJobs(),
+    )
+    # ui.button("Clear Table", on_click=lambda: app.clearTable())
     app = TaskScheduler()
     ui.run()
