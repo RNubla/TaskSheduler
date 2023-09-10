@@ -153,7 +153,7 @@ class TaskSchedulerService:
         """Return trigger details in dictionary or object format"""
         trigger_type = trigger.Type
         details = {
-            "type": "",
+            "type": None,
             "startBoundary": None,
             "duration": None,
             "repetition": None,
@@ -164,7 +164,7 @@ class TaskSchedulerService:
             case 1:  # TASK_TRIGGER_TIME
                 details["startBoundary"] = trigger.StartBoundary
                 details["enabled"] = trigger.Enabled
-                details["type"] = "time"
+                details["type"] = "once"
             case 2:  # TASK_TRIGGER_DAILY
                 details["type"] = "daily"
                 details["startBoundary"] = trigger.StartBoundary
