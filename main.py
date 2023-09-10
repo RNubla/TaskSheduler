@@ -107,6 +107,7 @@ import win32com.client
 import win32api
 from fastapi import FastAPI
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class TaskSchedulerService:
@@ -131,6 +132,7 @@ class TaskSchedulerService:
                 {
                     "path": task.Path,
                     "name": task.Name,
+                    "state": self.get_task_state_string(task.State),
                     "lastRunTime": task.LastRunTime,
                     "nextRunTime": task.NextRunTime,
                     "lastTaskResult": self.get_error_message(task.LastTaskResult),
@@ -148,6 +150,12 @@ class TaskSchedulerService:
 
     def get_task_list(self):
         return self.task_list
+
+    def get_task_state_string(self, task_state):
+        """Return a string representation of the task state."""
+        state_map = {0: "Unknown", 1: "Disabled", 2: "Queued", 3: "Ready", 4: "Running"}
+
+        return state_map.get(task_state, "Unknown")
 
     def get_trigger_details(self, trigger):
         """Return trigger details in dictionary or object format"""
@@ -248,6 +256,20 @@ class TaskSchedulerService:
 
 
 app = FastAPI()
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:3000",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
