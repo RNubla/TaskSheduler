@@ -86,7 +86,6 @@ target/
 # IPython
 profile_default/
 ipython_config.py
-
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
@@ -223,3 +222,4 @@ $RECYCLE.BIN/
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 
+__pycache__/main.cpython-310.pyc
