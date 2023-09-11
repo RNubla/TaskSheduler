@@ -102,8 +102,9 @@
 #     app = TaskScheduler()
 #     ui.run()
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import multiprocessing
+import re
 import uuid
 import win32com.client
 import win32api
@@ -185,7 +186,7 @@ class TaskSchedulerService:
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
-                    ] = f"every {trigger.Repetition.Interval} for {trigger.Repetition.Duration}"
+                    ] = f"every {self.parse_iso_duration(trigger.Repetition.Interval)} for {self.parse_iso_duration(trigger.Repetition.Duration)}"
             case 3:  # TASK_TRIGGER_WEEKLY
                 details["type"] = "weekly"
                 details["startBoundary"] = trigger.StartBoundary
@@ -196,7 +197,7 @@ class TaskSchedulerService:
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
-                    ] = f"every {trigger.Repetition.Interval} for {trigger.Repetition.Duration}"
+                    ] = f"every {self.parse_iso_duration(trigger.Repetition.Interval)} for {self.parse_iso_duration(trigger.Repetition.Duration)}"
 
             case 4:  # TASK_TRIGGER_MONTHLY
                 details["type"] = "monthly"
@@ -208,7 +209,7 @@ class TaskSchedulerService:
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
-                    ] = f"every {trigger.Repetition.Interval} for {trigger.Repetition.Duration}"
+                    ] = f"every {self.parse_iso_duration(trigger.Repetition.Interval)} for {self.parse_iso_duration(trigger.Repetition.Duration)}"
 
             case 5:  # TASK_TRIGGER_IDLE
                 details["type"] = "monthlyDow"
@@ -220,7 +221,7 @@ class TaskSchedulerService:
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
-                    ] = f"every {trigger.Repetition.Interval} for {trigger.Repetition.Duration}"
+                    ] = f"every {self.parse_iso_duration(trigger.Repetition.Interval)} for {self.parse_iso_duration(trigger.Repetition.Duration)}"
 
             case 6:  # TASK_TRIGGER_IDLE
                 details["type"] = "idle"
@@ -285,6 +286,21 @@ class TaskSchedulerService:
                 scheduled_days.append(day)
 
         return ", ".join(scheduled_days)
+
+    def parse_iso_duration(self, duration_str):
+        """Convert ISO 8601 duration format (like PT10M) to a timedelta."""
+        pattern = re.compile(r"(?P<hours>\d+H)?(?P<minutes>\d+M)?(?P<seconds>\d+S)?")
+        parts = pattern.search(duration_str)
+
+        if not parts:
+            return timedelta()
+
+        parts = parts.groupdict()
+        hours = int(parts["hours"][:-1]) if parts["hours"] else 0
+        minutes = int(parts["minutes"][:-1]) if parts["minutes"] else 0
+        seconds = int(parts["seconds"][:-1]) if parts["seconds"] else 0
+
+        return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
 app = FastAPI()
