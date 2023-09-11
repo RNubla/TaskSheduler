@@ -104,6 +104,7 @@
 
 from datetime import datetime
 import multiprocessing
+import uuid
 import win32com.client
 import win32api
 from fastapi import FastAPI
@@ -131,6 +132,7 @@ class TaskSchedulerService:
         if "Microsoft" not in task.Path:
             self.task_list.append(
                 {
+                    "id": uuid.uuid4(),
                     "path": task.Path,
                     "name": task.Name,
                     "state": self.get_task_state_string(task.State),
