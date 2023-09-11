@@ -192,7 +192,7 @@ class TaskSchedulerService:
                 details["enabled"] = trigger.Enabled
                 details[
                     "duration"
-                ] = f"every {trigger.WeeksInterval} week(s) on {trigger.DaysOfWeek}"
+                ] = f"every {trigger.WeeksInterval} week(s) on { self.decode_days_of_week(trigger.DaysOfWeek)}"
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
@@ -216,7 +216,7 @@ class TaskSchedulerService:
                 details["enabled"] = trigger.Enabled
                 details[
                     "duration"
-                ] = f"every {trigger.MonthsOfYear} month(s) on {trigger.DaysOfWeek} of week {trigger.WeeksOfMonth}"
+                ] = f"every {trigger.MonthsOfYear} month(s) on {self.decode_days_of_week(trigger.DaysOfWeek)} of week {trigger.WeeksOfMonth}"
                 if trigger.Repetition.Duration:
                     details[
                         "repetition"
@@ -267,6 +267,24 @@ class TaskSchedulerService:
         return datetime.strptime(str(task_time)[:19], "%Y-%m-%d %H:%M:%S").strftime(
             "%Y-%m-%d %I:%M:%S %p"
         )
+
+    def decode_days_of_week(self, days_value):
+        days = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ]
+        scheduled_days = []
+
+        for i, day in enumerate(days):
+            if days_value & (1 << i):
+                scheduled_days.append(day)
+
+        return ", ".join(scheduled_days)
 
 
 app = FastAPI()
