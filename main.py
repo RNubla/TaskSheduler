@@ -277,7 +277,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/TaskScheduler")
+@app.get("/api/TaskScheduler")
 async def TaskScheduler():
     ts = TaskSchedulerService()
     ts.read_tasks_in_folder(ts.root_folder)
