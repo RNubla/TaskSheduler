@@ -102,7 +102,7 @@
 #     app = TaskScheduler()
 #     ui.run()
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import multiprocessing
 import re
 import uuid
@@ -287,20 +287,43 @@ class TaskSchedulerService:
 
         return ", ".join(scheduled_days)
 
-    def parse_iso_duration(self, duration_str):
-        """Convert ISO 8601 duration format (like PT10M) to a timedelta."""
-        pattern = re.compile(r"(?P<hours>\d+H)?(?P<minutes>\d+M)?(?P<seconds>\d+S)?")
-        parts = pattern.search(duration_str)
+    # def parse_iso_duration(self, duration_str):
+    #     """Convert ISO 8601 duration format (like PT10M) to a timedelta."""
+    #     pattern = re.compile(r"(?P<hours>\d+H)?(?P<minutes>\d+M)?(?P<seconds>\d+S)?")
+    #     parts = pattern.search(duration_str)
 
-        if not parts:
-            return timedelta()
+    #     if not parts:
+    #         return timedelta()
 
-        parts = parts.groupdict()
-        hours = int(parts["hours"][:-1]) if parts["hours"] else 0
-        minutes = int(parts["minutes"][:-1]) if parts["minutes"] else 0
-        seconds = int(parts["seconds"][:-1]) if parts["seconds"] else 0
+    #     parts = parts.groupdict()
+    #     hours = int(parts["hours"][:-1]) if parts["hours"] else 0
+    #     minutes = int(parts["minutes"][:-1]) if parts["minutes"] else 0
+    #     seconds = int(parts["seconds"][:-1]) if parts["seconds"] else 0
 
-        return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    #     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+
+    def parse_iso_duration(self, duration):
+        """Convert ISO 8601 duration format to a human-readable format."""
+        if not duration:
+            return ""
+
+        # Extract days, hours, minutes, and seconds
+        match = re.match(r"P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", duration)
+        if not match:
+            return ""
+
+        parts = match.groups()
+        duration_strs = []
+        time_units = ["day", "hour", "minute", "second"]
+
+        for i, (part, unit) in enumerate(zip(parts, time_units)):
+            if part:
+                # Handle plural forms
+                duration_strs.append(
+                    f"{int(part)} {unit}{'s' if int(part) > 1 else ''}"
+                )
+
+        return " ".join(duration_strs)
 
 
 app = FastAPI()
