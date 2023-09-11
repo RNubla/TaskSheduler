@@ -129,7 +129,7 @@ class TaskSchedulerService:
             self.read_tasks_in_folder(subfolder)
 
     def append_tasks_list(self, task):
-        if "Microsoft" not in task.Path:
+        if "Microsoft" not in task.Path and "Optimize" not in task.Path:
             self.task_list.append(
                 {
                     "id": uuid.uuid4(),
@@ -166,6 +166,7 @@ class TaskSchedulerService:
         details = {
             "type": None,
             "startBoundary": None,
+            "endBoundary": "indefinitely",
             "duration": None,
             "repetition": None,
             "enabled": False,
@@ -246,6 +247,11 @@ class TaskSchedulerService:
                 details["enabled"] = trigger.Enabled
             case _:
                 details["type"] = "unknown"
+
+        if trigger.EndBoundary:
+            details["endBoundary"] = trigger.EndBoundary
+        else:
+            details["endBoundary"] = "indefinitely"
 
         return details
 
