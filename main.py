@@ -102,6 +102,7 @@
 #     app = TaskScheduler()
 #     ui.run()
 
+from datetime import datetime
 import multiprocessing
 import win32com.client
 import win32api
@@ -133,8 +134,8 @@ class TaskSchedulerService:
                     "path": task.Path,
                     "name": task.Name,
                     "state": self.get_task_state_string(task.State),
-                    "lastRunTime": task.LastRunTime,
-                    "nextRunTime": task.NextRunTime,
+                    "lastRunTime": self.format_time(task.LastRunTime),
+                    "nextRunTime": self.format_time(task.NextRunTime),
                     "lastTaskResult": self.get_error_message(task.LastTaskResult),
                     "triggerDetails": self.get_task_trigger(task=task),
                 }
@@ -253,6 +254,11 @@ class TaskSchedulerService:
             trigger_details = self.get_trigger_details(trigger)
             triggers.append(trigger_details)
         return triggers
+
+    def format_time(self, task_time):
+        return datetime.strptime(str(task_time)[:19], "%Y-%m-%d %H:%M:%S").strftime(
+            "%Y-%m-%d %I:%M:%S %p"
+        )
 
 
 app = FastAPI()
